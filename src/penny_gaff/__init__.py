@@ -93,16 +93,23 @@ def fit_frame(frame, win_w, win_h):
 
 @click.command()
 @click.option("--timeout", default=DEFAULT_TIMEOUT, type=int, help="Number of frames to play per clip before switching (default: 100).")
+@click.option("--video-timeout", default=None, type=int, help="Number of frames to play per video clip before switching (defaults to --timeout).")
+@click.option("--picture-timeout", default=None, type=int, help="Number of frames to display per picture before switching (defaults to --timeout).")
 @click.option("--pictures/--no-pictures", default=None, help="Enable or disable pictures (auto-detects pictures/ directory by default).")
 @click.option("--videos/--no-videos", default=None, help="Enable or disable videos (auto-detects videos/ directory by default).")
-def main(timeout, pictures, videos):
+def main(timeout, video_timeout, picture_timeout, pictures, videos):
+    if video_timeout is None:
+        video_timeout = timeout
+    if picture_timeout is None:
+        picture_timeout = timeout
+
     if pictures is None:
         pictures = os.path.isdir(os.path.join(os.getcwd(), 'pictures'))
     if videos is None:
         videos = os.path.isdir(os.path.join(os.getcwd(), 'videos'))
 
-    video_list = load_videos(timeout) if videos else []
-    picture_list = load_pictures(timeout) if pictures else []
+    video_list = load_videos(video_timeout) if videos else []
+    picture_list = load_pictures(picture_timeout) if pictures else []
     media = video_list + picture_list
 
     if len(media) == 0:
