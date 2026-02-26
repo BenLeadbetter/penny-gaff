@@ -1,0 +1,14 @@
+[project]
+name = "penny-gaff"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "opencv-python>=4.6",
+]
+
+[project.scripts]
+penny-gaff = "penny_gaff:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
