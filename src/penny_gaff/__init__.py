@@ -1,29 +1,31 @@
-import numpy as np
 import cv2 as cv
+import click
 import os
 import secrets
+
+DEFAULT_TIMEOUT = 100
 
 
 class Video:
     FRAME_RATE = 30
-    PLAY_FRAMES = 100
 
-    def __init__(self, mp4_path):
+    def __init__(self, mp4_path, play_frames):
+        self.play_frames = play_frames
         self.capture = cv.VideoCapture(mp4_path)
         self.frame_count = self.capture.get(cv.CAP_PROP_FRAME_COUNT)
         self.reset()
 
     def should_stop(self):
-        timed_out = self.counter == self.PLAY_FRAMES
+        timed_out = self.counter == self.play_frames
         eof = self.counter == self.frame_count
         return timed_out or eof
 
     def reset(self):
         self.counter = 0
-        if self.frame_count < self.PLAY_FRAMES:
+        if self.frame_count < self.play_frames:
             self.capture.set(cv.CAP_PROP_POS_FRAMES, 0)
         else:
-            pos = secrets.randbelow(int(self.frame_count - Video.PLAY_FRAMES))
+            pos = secrets.randbelow(int(self.frame_count - self.play_frames))
             self.capture.set(cv.CAP_PROP_POS_FRAMES, pos)
 
     def grab(self):
@@ -34,11 +36,13 @@ class Video:
         self.capture.release()
 
 
-def main():
+@click.command()
+@click.option("--timeout", default=DEFAULT_TIMEOUT, type=int, help="Number of frames to play per clip before switching (default: 100).")
+def main(timeout):
     videos = []
     for file in os.listdir(str(os.getcwd() + '/videos')):
         if file.endswith('.mp4'):
-            videos.append(Video('videos/{}'.format(file)))
+            videos.append(Video('videos/{}'.format(file), timeout))
 
     if len(videos) == 0:
         print('no mp4 videos found.')
